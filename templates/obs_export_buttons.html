@@ -1,0 +1,50 @@
+<!--
+* Name: obs_export_buttons.html
+* Description: The html and javascript that implements the UI for the export plugin.
+*
+* This comment block will be removed by the plugin before rendering.
+*
+* Author: Phil Hopper
+* Date:   2015-05-23
+-->
+<script type="text/javascript">
+    jQuery().ready(function() {
+
+        var tools = jQuery('body').find('#dokuwiki__pagetools').find('div.tools ul');
+        var btn = jQuery('<li><a href="#" class="action tx-export">@getTemplate@</a></li>');
+
+        btn.on('click', function(event) {
+
+            // if we don't remove focus, the button appears to be stuck
+            jQuery(event.target).blur();
+            event.preventDefault();
+
+            jQuery('#door43ObsExportDiv').dialog({
+                height: 500,
+                width: 700,
+                modal: true,
+                resize: function() {
+                    var h = document.getElementsByClassName('ui-dialog')[0].offsetHeight;
+                    h = h - 100;
+
+                    if (h > 0)
+                        document.getElementById('door43TranslateRegisterText').style.height = h + 'px';
+                }
+            });
+
+        });
+        tools.append(btn);
+    });
+
+    function closeExportDialog() {
+        jQuery('#door43ObsExportDiv').dialog('close');
+    }
+</script>
+<div id="door43ObsExportDiv" title="@exportTitle@" style="display: none">
+    <div style="display: block; width: 100%">
+        HELLO
+    </div>
+    <div style="display: inline-block; position: absolute; right: 16px; bottom: 10px;">
+        <button onclick="saveTranslation();">@saveButton@</button> <button onclick="closeExportDialog();">@cancelButton@</button>
+    </div>
+</div>
