@@ -29,9 +29,64 @@
 
                     if (h > 0)
                         document.getElementById('door43TranslateRegisterText').style.height = h + 'px';
+                },
+                open: function() {
+
+                    if (!document.getElementById('door43ObsExportOptions').innerHTML) {
+
+                        var url = DOKU_BASE + 'lib/exe/ajax.php';
+
+                        var dataValues = {
+                            call: 'get_obs_doc_export_dlg'
+                        };
+
+                        var ajaxSettings = {
+                            type: 'GET',
+                            url: url,
+                            data: dataValues
+                        };
+
+                        jQuery.ajax(ajaxSettings).done(function(data) {
+                            document.getElementById('door43ObsExportOptions').innerHTML = data;
+
+                            // We need to get the data from the plugin because of browser Cross-Origin restrictions.
+                            var url = DOKU_BASE + 'lib/exe/ajax.php';
+
+                            var dataValues = {
+                                call: 'cross_origin_request',
+                                contentType: 'application/json',
+                                requestUrl: 'https://api.unfoldingword.org/obs/txt/1/obs-catalog.json'
+                            };
+
+                            var ajaxSettings = {
+                                type: 'POST',
+                                url: url,
+                                data: dataValues
+                            };
+
+                            jQuery.ajax(ajaxSettings).done(function(data) {
+
+                                if (!data) return;
+
+                                var select = jQuery('#selectObsDocxSource');
+
+                                for (var i = 0; i < data.length; i++) {
+
+                                    var langData = data[i];
+
+                                    if (langData['status']['checking_level'] !== '3')
+                                        continue;
+
+                                    select.append(jQuery('<option></option>')
+                                        .attr('value', langData['language'])
+                                        .text(langData['string'] + ' (' + langData['language'] + ')')
+                                    );
+                                }
+                            });
+                        });
+                    }
                 }
             });
-
         });
         tools.append(btn);
     });
@@ -39,12 +94,22 @@
     function closeExportDialog() {
         jQuery('#door43ObsExportDiv').dialog('close');
     }
+
+    function exportSourceTemplate() {
+
+        var lang = document.getElementById('selectObsDocxSource');
+        if (!lang.value) return;
+
+        var url = DOKU_BASE + 'lib/exe/ajax.php?call=download_obs_template_docx&lang=' + lang.value;
+
+        window.open(url, '_blank');
+
+        closeExportDialog();
+    }
 </script>
 <div id="door43ObsExportDiv" title="@exportTitle@" style="display: none">
-    <div style="display: block; width: 100%">
-        HELLO
-    </div>
+    <div id="door43ObsExportOptions" style="display: block; width: 100%"></div>
     <div style="display: inline-block; position: absolute; right: 16px; bottom: 10px;">
-        <button onclick="saveTranslation();">@saveButton@</button> <button onclick="closeExportDialog();">@cancelButton@</button>
+        <button onclick="exportSourceTemplate();">@saveButton@</button> <button onclick="closeExportDialog();">@cancelButton@</button>
     </div>
 </div>
