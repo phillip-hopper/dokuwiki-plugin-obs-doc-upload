@@ -1,10 +1,10 @@
 <?php
 /**
- * Name: UploadDoc.php
- * Description: A Dokuwiki syntax plugin to allow the user to upload OBS doc files.
+ * Name: DownloadDoc.php
+ * Description: A Dokuwiki syntax plugin to allow the user to download OBS doc files.
  *
  * Author: Phil Hopper
- * Date:   2015-05-20
+ * Date:   2015-05-23
  */
 
 // must be run within Dokuwiki
@@ -19,11 +19,11 @@ if (empty($door43shared)) {
 $door43shared->loadPluginBase();
 
 /**
- * Class to allow the user to upload OBS doc files
+ * Class to allow the user to download OBS doc files
  */
-class syntax_plugin_door43obsdocupload_UploadDocFile extends Door43_Syntax_Plugin {
+class syntax_plugin_door43obsdocupload_DownloadDocFile extends Door43_Syntax_Plugin {
 
     function __construct() {
-        parent::__construct('obsDocUpload', '');
+        parent::__construct('obsDocDownload', '');
     }
 }
