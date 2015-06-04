@@ -80,10 +80,16 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
 
     public function download_obs_template_docx() {
 
-        // get the obs data
+
         global $INPUT;
         $langCode = $INPUT->str('lang');
 
+        // get the metadata
+        $url = 'https://api.unfoldingword.org/obs/txt/1/en/status-en.json';
+        $raw = file_get_contents($url);
+        $metaData = json_decode($raw, true);
+
+        // get the obs data
         $url = "https://api.unfoldingword.org/obs/txt/1/{$langCode}/obs-{$langCode}.json";
         $raw = file_get_contents($url);
         $obs = json_decode($raw, true);
@@ -123,9 +129,12 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
 
         // send to the browser
         if (is_file($docxFile)) {
+
+            $saveAsName = 'obs_' . $langCode . '_v' . preg_replace('/(\s+|\.+)+/', '-', $metaData['version']) . '_' . date('Y-m-d') . '.docx';
+
             header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document; charset=utf-8');
             header('Content-Length: ' . filesize($docxFile));
-            header('Content-Disposition: attachment; filename="obs_template.docx"');
+            header('Content-Disposition: attachment; filename="' . $saveAsName . '"');
 
             readfile($docxFile);
         }
