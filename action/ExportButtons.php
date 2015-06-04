@@ -80,12 +80,11 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
 
     public function download_obs_template_docx() {
 
-
         global $INPUT;
         $langCode = $INPUT->str('lang');
 
         // get the metadata
-        $url = 'https://api.unfoldingword.org/obs/txt/1/en/status-en.json';
+        $url = "https://api.unfoldingword.org/obs/txt/1/{$langCode}/status-{$langCode}.json";
         $raw = file_get_contents($url);
         $metaData = json_decode($raw, true);
 
@@ -101,6 +100,7 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
             $markdown .= str_repeat('=', strlen($chapter['title'])) . "\n\n";
 
             foreach ($chapter['frames'] as $frame) {
+                $markdown .= "[{$frame['img']}]({$frame['img']})\n\n";
                 $markdown .= "{$frame['text']}\n\n";
             }
 
