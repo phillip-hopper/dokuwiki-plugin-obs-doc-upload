@@ -100,7 +100,9 @@
         var lang = document.getElementById('selectObsDocxSource');
         if (!lang.value) return;
 
-        var url = DOKU_BASE + 'lib/exe/ajax.php?call=download_obs_template_docx&lang=' + lang.value;
+        var images = document.getElementById('includeObsDocxImages').checked ? 1 : 0;
+
+        var url = DOKU_BASE + 'lib/exe/ajax.php?call=download_obs_template_docx&lang=' + lang.value + '&img=' + images;
 
         window.open(url, '_blank');
 
