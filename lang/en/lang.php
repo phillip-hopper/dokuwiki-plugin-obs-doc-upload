@@ -15,6 +15,7 @@ $lang['getTemplate'] = 'Get template';
 $lang['exportTitle'] = 'Export OBS Template';
 $lang['sourceLabel'] = 'Template Source Language';
 $lang['docxFileCreateError'] = 'Error creating the docx file';
+$lang['includeImagesLabel'] = 'Include all images in the file';
 
 // localized strings for JavaScript
 // js example: var text = LANG.plugins['door43register']['translate'];

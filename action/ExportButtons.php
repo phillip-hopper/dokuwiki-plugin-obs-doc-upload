@@ -31,13 +31,12 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
         $controller->register_hook('TPL_ACT_RENDER', 'AFTER', $this, 'handle_obs_action');
         Door43_Ajax_Helper::register_handler($controller, 'get_obs_doc_export_dlg', array($this, 'get_obs_doc_export_dlg'));
         Door43_Ajax_Helper::register_handler($controller, 'download_obs_template_docx', array($this, 'download_obs_template_docx'));
-
     }
 
     /**
+     * This adds a button to the right-hand tool strip on OBS pages.
      * @param Doku_Event $event  event object by reference
-     * @param mixed      $param  [the parameters passed as fifth argument to register_hook() when this
-     *                           handler was registered]
+     * @param mixed $param  [the parameters passed as fifth argument to register_hook() when this handler was registered]
      * @return void
      */
     public function handle_obs_action(Doku_Event &$event, /** @noinspection PhpUnusedParameterInspection */ $param) {
@@ -78,10 +77,22 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
         echo $html;
     }
 
+    private function get_image_file_from_url($url) {
+
+        // https://api.unfoldingword.org/obs/jpg/1/en/360px/obs-en-01-01.jpg
+        // /var/www/vhosts/api.unfoldingword.org/httpdocs/obs/jpg/1/en/360px/obs-en-01-01.jpg
+        $file_name = str_replace('https://api.unfoldingword.org/obs/',
+                                 '/var/www/vhosts/api.unfoldingword.org/httpdocs/obs/',
+                                 $url);
+
+        return (is_file($file_name)) ? $file_name : '';
+    }
+
     public function download_obs_template_docx() {
 
         global $INPUT;
         $langCode = $INPUT->str('lang');
+        $includeImages = $INPUT->bool('img');
 
         // get the metadata
         $url = "https://api.unfoldingword.org/obs/txt/1/{$langCode}/status-{$langCode}.json";
@@ -94,13 +105,29 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
         $obs = json_decode($raw, true);
         $markdown = '';
 
+        // get the images, download if requested to be included
+        $images = array();
+        foreach ($obs['chapters'] as $chapter) {
+
+            foreach ($chapter['frames'] as $frame) {
+
+                if ($includeImages) {
+                    $image_file = $this->get_image_file_from_url($frame['img']);
+                    $images[$frame['id']] = "![{$frame['id']}]({$image_file})\\";
+                }
+                else {
+                    $images[$frame['id']] = "[{$frame['img']}]({$frame['img']})";
+                }
+            }
+        }
+
         foreach ($obs['chapters'] as $chapter) {
 
             $markdown .= $chapter['title'] . "\n";
             $markdown .= str_repeat('=', strlen($chapter['title'])) . "\n\n";
 
             foreach ($chapter['frames'] as $frame) {
-                $markdown .= "[{$frame['img']}]({$frame['img']})\n\n";
+                $markdown .= "{$images[$frame['id']]}\n\n";
                 $markdown .= "{$frame['text']}\n\n";
             }
 
