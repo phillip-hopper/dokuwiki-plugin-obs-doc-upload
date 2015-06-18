@@ -21,6 +21,25 @@ $door43shared->loadAjaxHelper();
 
 class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugin {
 
+    private $tempDir;
+
+    public function __destruct() {
+
+        // cleanup
+        if (!empty($this->tempDir)) {
+
+            /* @var $door43shared helper_plugin_door43shared */
+            global $door43shared;
+
+            // $door43shared is a global instance, and can be used by any of the door43 plugins
+            if (empty($door43shared)) {
+                $door43shared = plugin_load('helper', 'door43shared');
+            }
+
+            $door43shared->delete_directory_and_files($this->tempDir);
+        }
+    }
+
     /**
      * Registers a callback function for a given event
      *
@@ -116,7 +135,7 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
         // now put it all together
         $markdown = $frontMatter['name'] . "\n";
         $markdown .= str_repeat('=', strlen($frontMatter['name'])) . "\n\n";
-        $markdown .= $frontMatter['front-matter'] . "\n\n";
+        $markdown .= $this->dokuwiki_to_markdown($frontMatter['front-matter']) . "\n\n";
         $markdown .= "-----\n\n";
 
         // get the images, download if requested to be included
@@ -157,14 +176,12 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
             $increment++;
         }
 
-        $tempDir = $tempDir . DIRECTORY_SEPARATOR . $increment;
-        mkdir($tempDir, 0755, true);
-
+        $tempDir = $this->get_temp_dir();
         $markdownFile = $tempDir . DIRECTORY_SEPARATOR . 'obs.md';
-        $docxFile = $tempDir . DIRECTORY_SEPARATOR . 'obs.docx';
         file_put_contents($markdownFile, $markdown);
 
         // convert to docx with pandoc
+        $docxFile = $tempDir . DIRECTORY_SEPARATOR . 'obs.docx';
         $cmd = "/usr/bin/pandoc \"$markdownFile\" -s -f markdown -t docx  -o \"$docxFile\"";
         exec($cmd, $output, $error);
 
@@ -184,16 +201,35 @@ class action_plugin_door43obsdocupload_ExportButtons extends Door43_Action_Plugi
             header('Content-Type: text/plain');
             echo $this->getLang('docxFileCreateError');
         }
+    }
 
-        // cleanup
-        /* @var $door43shared helper_plugin_door43shared */
-        global $door43shared;
+    private function get_temp_dir() {
 
-        // $door43shared is a global instance, and can be used by any of the door43 plugins
-        if (empty($door43shared)) {
-            $door43shared = plugin_load('helper', 'door43shared');
+        if (empty($this->tempDir)) {
+
+            $increment = 0;
+            $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'obs2docx';
+
+            while (is_dir($dir . DIRECTORY_SEPARATOR . $increment)) {
+                $increment++;
+            }
+
+            $dir = $dir . DIRECTORY_SEPARATOR . $increment;
+            mkdir($dir, 0755, true);
+
+            $this->tempDir = $dir;
         }
 
-        $door43shared->delete_directory_and_files($tempDir);
+        return $this->tempDir;
+    }
+
+    private function dokuwiki_to_markdown($dokuwikiText) {
+
+        // check out this link:
+        // https://github.com/ludoza/DokuWiki-to-Markdown-Converter/blob/master/scripts/DocuwikiToMarkdownExtra.php
+
+        $returnVal = $dokuwikiText;
+
+        return $returnVal;
     }
 }
